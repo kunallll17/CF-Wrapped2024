@@ -10,20 +10,17 @@ function calculatePercentileRank(rating: number): number {
   return Math.round((1 - (currentRating / maxRating)) * 100);
 }
 
-function calculateUniversalRank(rating: number): string {
-  if (rating === 0) return "Unrated";
-  
-  // Codeforces uses these thresholds for ranks
-  if (rating >= 3000) return "0.1"; // Legendary Grandmaster
-  if (rating >= 2600) return "0.3"; // International Grandmaster
-  if (rating >= 2400) return "1";   // Grandmaster
-  if (rating >= 2300) return "2";   // International Master
-  if (rating >= 2100) return "5";   // Master
-  if (rating >= 1900) return "10";  // Candidate Master
-  if (rating >= 1600) return "20";  // Expert
-  if (rating >= 1400) return "50";  // Specialist
-  if (rating >= 1200) return "70";  // Pupil
-  return "100";                     // Newbie
+function calculateUniversalRank(rating: number): number {
+  if (rating >= 3000) return 1;
+  if (rating >= 2600) return 2;
+  if (rating >= 2400) return 3;
+  if (rating >= 2300) return 4;
+  if (rating >= 2100) return 5;
+  if (rating >= 1900) return 6;
+  if (rating >= 1600) return 7;
+  if (rating >= 1400) return 8;
+  if (rating >= 1200) return 9;
+  return 10;
 }
 
 export async function processUserStats(
