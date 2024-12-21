@@ -1,22 +1,23 @@
-import { Redis } from '@upstash/redis';
-import { RATE_LIMIT } from './api';
+const WINDOW_SIZE = 60 * 1000; // 1 minute
+const MAX_REQUESTS = 10; // max requests per window
 
-const redis = Redis.fromEnv();
+const requests = new Map<string, number[]>();
 
 export async function rateLimit(identifier: string) {
-  const key = `rate_limit:${identifier}`;
   const now = Date.now();
-  const windowStart = now - RATE_LIMIT.windowMs;
-
-  const requests = await redis.zrangebyscore(key, windowStart, '+inf');
+  const windowStart = now - WINDOW_SIZE;
   
-  if (requests.length >= RATE_LIMIT.maxRequests) {
+  // Get existing requests and filter out old ones
+  const userRequests = (requests.get(identifier) || [])
+    .filter(timestamp => timestamp > windowStart);
+  
+  if (userRequests.length >= MAX_REQUESTS) {
     return { success: false };
   }
-
-  await redis.zadd(key, now, now.toString());
-  await redis.zremrangebyscore(key, 0, windowStart);
-  await redis.expire(key, Math.floor(RATE_LIMIT.windowMs / 1000));
-
+  
+  // Add new request
+  userRequests.push(now);
+  requests.set(identifier, userRequests);
+  
   return { success: true };
 }
